@@ -3,26 +3,17 @@ package com.example.jordanhsu.instagramphotoviewer;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.ocpsoft.pretty.time.PrettyTime;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends Activity {
@@ -46,14 +37,16 @@ public class MainActivity extends Activity {
         apiUtil = new InstagramAPIUtil(self);
 
         // init render
-        renderPopularPage();
+//        renderPopularPage();
+        doGetInstagramPopularDataAsync();
 
         // swipe to refresh
         swipeContainer =  (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                renderPopularPage();
+//                renderPopularPage();
+                doGetInstagramPopularDataAsync();
                 swipeContainer.setRefreshing(false);
             }
         });
@@ -81,9 +74,13 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void renderPopularPage(){
+    public void doGetInstagramPopularDataAsync(){
+        new GetInstagramPopularDataTask(IG_API_PREFIX + "/media/popular?access_token=" + IG_AUTH_TOKEN, (MainActivity) self).execute();
+    }
+
+    public void renderPopularPage(JSONObject result){
         try {
-            IGPostRowList = apiUtil.getPopularInstagramData();
+            IGPostRowList = apiUtil.processPopularInstagramData(result);
             if(IGPostRowList != null){
                 mainContainerListView = (ListView) findViewById(R.id.mainContainerListView);
                 IGPostRowAdapter = new InstagramPostRowAdapter(self,0,IGPostRowList);

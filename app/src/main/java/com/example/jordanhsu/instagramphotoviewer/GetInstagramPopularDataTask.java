@@ -1,5 +1,6 @@
 package com.example.jordanhsu.instagramphotoviewer;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -8,19 +9,23 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
 
 /**
  * Created by jordanhsu on 7/26/15.
  */
-public class GetHttpJSONTask extends AsyncTask<Void, Void, JSONObject> {
+public class GetInstagramPopularDataTask extends AsyncTask<Void, Void, JSONObject> {
 
     private static final String GET_JSON_ASYNC_TASK_DEV_TAG = "getJsonAsyncTaskDevTag";
     private String urlStr;
+    private WeakReference<MainActivity> activityWeakReference;
 
-    public GetHttpJSONTask(String url) {
+    public GetInstagramPopularDataTask(String url, MainActivity mainActivity)
+    {
         this.urlStr = url;
+        this.activityWeakReference = new WeakReference<MainActivity>(mainActivity);
     }
 
 
@@ -57,8 +62,10 @@ public class GetHttpJSONTask extends AsyncTask<Void, Void, JSONObject> {
     }
 
     @Override
-    protected void onPostExecute(JSONObject s) {
-//        Log.d(DATA_RETRIVE_TASK,"GG");
+    protected void onPostExecute(JSONObject result) {
+        if ( activityWeakReference.get() != null){
+            activityWeakReference.get().renderPopularPage(result);
+        }
     }
 }
 

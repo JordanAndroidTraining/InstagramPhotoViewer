@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by jordanhsu on 7/28/15.
@@ -30,11 +29,11 @@ public class InstagramAPIUtil {
         this.context = context;
     }
 
-    public ArrayList<InstagramPostRow> getPopularInstagramData() throws IOException, JSONException {
+    public ArrayList<InstagramPostRow> processPopularInstagramData(JSONObject result) throws IOException, JSONException {
         ArrayList<InstagramPostRow> returnList = new ArrayList<InstagramPostRow>();
         // process API data
-        Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "getPopularInstagramData");
-        JSONObject result = InstagramAPIClient("/media/popular");
+        Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "processPopularInstagramData");
+//        JSONObject result = InstagramAPIClient("/media/popular");
         Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "result: " + result.toString());
 
         try {
@@ -66,8 +65,9 @@ public class InstagramAPIUtil {
                         "\n userProfilePhotoUrl: " + userProfilePhotoUrl);
 
                 Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "\n has caption:" + row.has("caption"));
+
                 if (row.has("caption")){
-                    Log.d(INSTAGRAM_API_UTIL_DEV_TAG,"DON't Do it, YOU DIE!!!!! ");
+                    Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "\n has caption(in if):" + row.has("caption"));
                     Log.d(INSTAGRAM_API_UTIL_DEV_TAG, row.getJSONObject("caption").toString());
                     caption = row.getJSONObject("caption").has("text") ? row.getJSONObject("caption").getString("text") : "";
                 }
@@ -147,19 +147,5 @@ public class InstagramAPIUtil {
             Log.d(INSTAGRAM_API_UTIL_DEV_TAG, e.getMessage());
             return null;
         }
-    }
-
-    public JSONObject InstagramAPIClient(String apiRoute) {
-        try {
-            Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "process api: " + apiRoute);
-            Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "auth token: " + String.valueOf(IG_AUTH_TOKEN));
-            JSONObject result = new GetHttpJSONTask(IG_API_PREFIX + apiRoute + "?access_token=" + IG_AUTH_TOKEN).execute().get();
-            return result;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }
