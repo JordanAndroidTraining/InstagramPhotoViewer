@@ -2,6 +2,7 @@ package com.example.jordanhsu.instagramphotoviewer;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,9 +27,12 @@ public class InstagramPostRowAdapter extends ArrayAdapter<InstagramPostRow> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.post_item,null);
+    public View getView(int position, View view, ViewGroup parent) {
+        if (view == null) {
+            Log.d(IG_POST_ROW_ADAPTER_DEV_TAG, "Convert View is null");
+            view = LayoutInflater.from(context).inflate(R.layout.post_item,parent,false);
+        }
+
         TextView usernameTv = (TextView) view.findViewById(R.id.userNameTextView);
         TextView captionTv = (TextView) view.findViewById(R.id.captionTextView);
         TextView likeCountTv = (TextView) view.findViewById(R.id.likeCountTextView);
@@ -41,7 +45,6 @@ public class InstagramPostRowAdapter extends ArrayAdapter<InstagramPostRow> {
         TextView commentContentTv2 = (TextView) view.findViewById(R.id.commentContentTextView2);
         ImageView commentProfilePhotoIv2 = (ImageView) view.findViewById(R.id.commentProfileImageView2);
 
-
         usernameTv.setText(IGPostRowList.get(position).getUserName());
         captionTv.setText(IGPostRowList.get(position).getCaption());
         likeCountTv.setText(IGPostRowList.get(position).getLikeCount());
@@ -50,35 +53,48 @@ public class InstagramPostRowAdapter extends ArrayAdapter<InstagramPostRow> {
         commentUserNameTv2.setText(IGPostRowList.get(position).getCommentUserName2());
         commentContentTv2.setText(IGPostRowList.get(position).getCommentContent2());
 
-        new ImageLoadingTask(IGPostRowList.get(position).getUserProfilePhotoUrl(),userProfilePhotoIv).execute();
-        new ImageLoadingTask(IGPostRowList.get(position).getMainPhotoUrl(),mainPhotoIv).execute();
-        new ImageLoadingTask(IGPostRowList.get(position).getCommentUserProfilePhotoUrl1(),commentProfilePhotoIv1).execute();
-        new ImageLoadingTask(IGPostRowList.get(position).getCommentUserProfilePhotoUrl2(),commentProfilePhotoIv2).execute();
+        mainPhotoIv.setImageResource(0);
+        userProfilePhotoIv.setImageResource(0);
+        commentProfilePhotoIv1.setImageResource(0);
+        commentProfilePhotoIv2.setImageResource(0);
+
+        // retrieve previous task and stop it
+        ImageLoadingTask prevUserProfileTask = (ImageLoadingTask) userProfilePhotoIv.getTag();
+        if(prevUserProfileTask != null) {
+            prevUserProfileTask.cancel(true);
+        }
+
+        ImageLoadingTask prevMainPhotoTask = (ImageLoadingTask) mainPhotoIv.getTag();
+        if(prevMainPhotoTask != null){
+            prevMainPhotoTask.cancel(true);
+        }
+
+        ImageLoadingTask prevCommentProfilePhotoTask1 = (ImageLoadingTask) commentProfilePhotoIv1.getTag();
+        if(prevCommentProfilePhotoTask1 != null){
+            prevCommentProfilePhotoTask1.cancel(true);
+        }
+
+        ImageLoadingTask prevCommentProfilePhotoTask2 = (ImageLoadingTask) commentProfilePhotoIv2.getTag();
+        if(prevCommentProfilePhotoTask2 != null){
+            prevCommentProfilePhotoTask2.cancel(true);
+        }
+
+        // create new task
+        ImageLoadingTask userProfilePhotoTask =  new ImageLoadingTask(IGPostRowList.get(position).getUserProfilePhotoUrl(),userProfilePhotoIv);
+        ImageLoadingTask mainPhotoTask = new ImageLoadingTask(IGPostRowList.get(position).getMainPhotoUrl(),mainPhotoIv);
+        ImageLoadingTask commentProfielPhotoTask1 = new ImageLoadingTask(IGPostRowList.get(position).getCommentUserProfilePhotoUrl1(),commentProfilePhotoIv1);
+        ImageLoadingTask commentProfielPhotoTask2 = new ImageLoadingTask(IGPostRowList.get(position).getCommentUserProfilePhotoUrl2(),commentProfilePhotoIv2);
+
+        userProfilePhotoIv.setTag(userProfilePhotoTask);
+        mainPhotoIv.setTag(mainPhotoTask);
+        commentProfilePhotoIv1.setTag(commentProfielPhotoTask1);
+        commentProfilePhotoIv2.setTag(commentProfielPhotoTask2);
+
+        // execute asyncTask
+        userProfilePhotoTask.execute();
+        mainPhotoTask.execute();
+        commentProfielPhotoTask1.execute();
+        commentProfielPhotoTask2.execute();
         return  view;
     }
-
-//    public static Bitmap loadBitmap(String url) {
-//        Bitmap bitmap = null;
-//        InputStream in = null;
-//        BufferedOutputStream out = null;
-//
-//        try {
-//            in = new BufferedInputStream(new URL(url).openStream(), 1024);
-//
-//            final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-//            out = new BufferedOutputStream(dataStream, 1024);
-//            copy(in, out);
-//            out.flush();
-//
-//            final byte[] data = dataStream.toByteArray();
-//            BitmapFactory.Options options = new BitmapFactory.Options();
-//            //options.inSampleSize = 1;
-//
-//            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length,options);
-//        } catch (IOException e) {
-//            Log.e(IG_POST_ROW_ADAPTER_DEV_TAG, "Could not load Bitmap from: " + url);
-//        }
-//        return bitmap;
-//    }
-
 }
