@@ -110,7 +110,7 @@ public class MainActivity extends Activity {
                 if(row.has("likes")){
                     if(row.getJSONObject("likes").has("count")){
                         DecimalFormat myFormatter = new DecimalFormat("###,###");
-                        likeCount = myFormatter.format(row.getJSONObject("likes").getInt("count"));
+                        likeCount = myFormatter.format(row.getJSONObject("likes").getInt("count")) + " " + getString(R.string.like_wording);
 
                     }
                 }
@@ -129,14 +129,14 @@ public class MainActivity extends Activity {
 
                 if (commentCount >= 2){
                     JSONArray commentArr = row.getJSONObject("comments").getJSONArray("data");
-                    JSONObject comment1 = commentArr.getJSONObject(0);
+                    JSONObject comment1 = commentArr.getJSONObject(commentArr.length() - 2);
                     if (comment1.has("from")){
                         commentUserName1 = comment1.getJSONObject("from").has("username") ? comment1.getJSONObject("from").getString("username"): "";
                         commentProfilePhotoUrl1 = comment1.getJSONObject("from").has("profile_picture") ? comment1.getJSONObject("from").getString("profile_picture"): "";
                         commentContent1 = comment1.has("text") ? comment1.getString("text") : "";
                     }
 
-                    JSONObject comment2 = commentArr.getJSONObject(1);
+                    JSONObject comment2 = commentArr.getJSONObject(commentArr.length() - 1);
                     if(comment2.has("from")){
                         commentUserName2 = comment2.getJSONObject("from").has("username") ? comment2.getJSONObject("from").getString("username") : "";
                         commentProfilePhotoUrl2 = comment2.getJSONObject("from").has("profile_picture") ? comment2.getJSONObject("from").getString("profile_picture") : "";
