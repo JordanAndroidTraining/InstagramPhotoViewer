@@ -44,6 +44,8 @@ public class InstagramPostRowAdapter extends ArrayAdapter<InstagramPostRow> {
         TextView commentUserNameTv2 = (TextView) view.findViewById(R.id.commentUserNameTextView2);
         TextView commentContentTv2 = (TextView) view.findViewById(R.id.commentContentTextView2);
         ImageView commentProfilePhotoIv2 = (ImageView) view.findViewById(R.id.commentProfileImageView2);
+        TextView relativeTimestampTv = (TextView) view.findViewById(R.id.relativeTimestampTextView);
+
 
         usernameTv.setText(IGPostRowList.get(position).getUserName());
         captionTv.setText(IGPostRowList.get(position).getCaption());
@@ -52,6 +54,7 @@ public class InstagramPostRowAdapter extends ArrayAdapter<InstagramPostRow> {
         commentContentTv1.setText(IGPostRowList.get(position).getCommentContent1());
         commentUserNameTv2.setText(IGPostRowList.get(position).getCommentUserName2());
         commentContentTv2.setText(IGPostRowList.get(position).getCommentContent2());
+        relativeTimestampTv.setText(IGPostRowList.get(position).getRelativeTimestamp());
 
         doAsyncImageLoadingTask(IGPostRowList.get(position).getUserProfilePhotoUrl(),userProfilePhotoIv);
         doAsyncImageLoadingTask(IGPostRowList.get(position).getMainPhotoUrl(),mainPhotoIv);

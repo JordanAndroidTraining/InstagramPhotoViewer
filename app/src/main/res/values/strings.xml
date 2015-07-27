@@ -17,4 +17,5 @@
     <string name="like_wording">likes</string>
     <string name="load_more">Load more comments...</string>
     <string name="get_popular_data_failed_msg">Get popular data failed!\n please try again later</string>
+    <string name="relative_timestamp_placeholder">just now</string>
 </resources>

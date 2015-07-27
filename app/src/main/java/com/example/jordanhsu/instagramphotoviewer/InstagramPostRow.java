@@ -15,6 +15,25 @@ public class InstagramPostRow {
     private String commentUserName2;
     private String commentContent2;
     private String commentUserProfilePhotoUrl2;
+    private Long createTimestamp;
+    private String relativeTimestamp;
+
+    public String getRelativeTimestamp() {
+        return relativeTimestamp;
+    }
+
+    public void setRelativeTimestamp(String relativeTimestamp) {
+        this.relativeTimestamp = relativeTimestamp;
+    }
+
+    public Long getCreateTimestamp() {
+        return createTimestamp;
+    }
+
+    public void setCreateTimestamp(Long createTimestamp) {
+        this.createTimestamp = createTimestamp;
+    }
+
 
     public String getCommentUserProfilePhotoUrl1() {
         return commentUserProfilePhotoUrl1;

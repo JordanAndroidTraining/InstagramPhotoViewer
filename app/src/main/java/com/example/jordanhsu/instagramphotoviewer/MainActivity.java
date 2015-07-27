@@ -3,19 +3,25 @@ package com.example.jordanhsu.instagramphotoviewer;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.ocpsoft.pretty.time.PrettyTime;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 
@@ -29,15 +35,19 @@ public class MainActivity extends Activity {
     private ListView mainContainerListView;
     private SwipeRefreshLayout swipeContainer;
     private Activity self;
+    private InstagramAPIUtil apiUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "onCreate");
-        this.self = this;
+        self = this;
+        apiUtil = new InstagramAPIUtil(self);
 
+        // init render
         renderPopularPage();
+
         // swipe to refresh
         swipeContainer =  (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -73,7 +83,7 @@ public class MainActivity extends Activity {
 
     public void renderPopularPage(){
         try {
-            IGPostRowList = getPopularInstagramData();
+            IGPostRowList = apiUtil.getPopularInstagramData();
             if(IGPostRowList != null){
                 mainContainerListView = (ListView) findViewById(R.id.mainContainerListView);
                 IGPostRowAdapter = new InstagramPostRowAdapter(self,0,IGPostRowList);
@@ -87,134 +97,5 @@ public class MainActivity extends Activity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-
-    public ArrayList<InstagramPostRow> getPopularInstagramData() throws IOException, JSONException {
-        ArrayList<InstagramPostRow> returnList = new ArrayList<InstagramPostRow>();
-        // process API data
-        Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "getPopularInstagramData");
-        JSONObject result = InstagramAPIClient("/media/popular");
-        Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "result: " + result.toString());
-
-        try {
-            JSONArray allRowData = result.getJSONArray("data");
-            for (int i = 0; i < allRowData.length(); i++){
-                InstagramPostRow ipRow = new InstagramPostRow();
-                JSONObject row = allRowData.getJSONObject(i);
-
-                String username = "";
-                String userProfilePhotoUrl = "";
-                String caption = "";
-                String likeCount = "";
-                String mainPhotoUrl = "";
-                String commentUserName1 = "";
-                String commentProfilePhotoUrl1 = "";
-                String commentContent1 = "";
-                String commentUserName2 = "";
-                String commentProfilePhotoUrl2 = "";
-                String commentContent2 = "";
-                int commentCount = 0;
-
-                if (row.has("user")){
-                    JSONObject userObj = row.getJSONObject("user");
-                    username = userObj.has("username") ? userObj.getString("username") : "";
-                    userProfilePhotoUrl = userObj.has("profile_picture") ? userObj.getString("profile_picture") : "";
-                }
-                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "\n username: " + username +
-                        "\n userProfilePhotoUrl: " + userProfilePhotoUrl);
-
-                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "\n has caption:" + row.has("caption"));
-                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "\n has GGLA:" + row.has("GGLA"));
-                if (row.has("caption")){
-                    Log.d(MAIN_ACTIVITY_LOG_DEV_TAG,"DON't Do it, YOU DIE!!!!! ");
-                    Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, row.getJSONObject("caption").toString());
-                    caption = row.getJSONObject("caption").has("text") ? row.getJSONObject("caption").getString("text") : "";
-                }
-
-
-                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "\n caption:" + caption);
-
-
-                if(row.has("likes")){
-                    if(row.getJSONObject("likes").has("count")){
-                        DecimalFormat myFormatter = new DecimalFormat("###,###");
-                        likeCount = myFormatter.format(row.getJSONObject("likes").getInt("count")) + " " + getString(R.string.like_wording);
-
-                    }
-                }
-
-                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG,"\n likeCount: " + likeCount);
-
-
-                if(row.has("images")){
-                    if(row.getJSONObject("images").has("standard_resolution")){
-                        if(row.getJSONObject("images").getJSONObject("standard_resolution").has("url")){
-                            mainPhotoUrl = row.getJSONObject("images").getJSONObject("standard_resolution").getString("url");
-                        }
-                    }
-                }
-
-                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "\n mainPhotoUrl: " + mainPhotoUrl);
-
-                if(row.has("comments")){
-                    commentCount = row.getJSONObject("comments").has("count") ? row.getJSONObject("comments").getInt("count") : 0;
-                }
-
-                if (commentCount >= 2){
-                    JSONArray commentArr = row.getJSONObject("comments").getJSONArray("data");
-                    JSONObject comment1 = commentArr.getJSONObject(commentArr.length() - 2);
-                    if (comment1.has("from")){
-                        commentUserName1 = comment1.getJSONObject("from").has("username") ? comment1.getJSONObject("from").getString("username"): "";
-                        commentProfilePhotoUrl1 = comment1.getJSONObject("from").has("profile_picture") ? comment1.getJSONObject("from").getString("profile_picture"): "";
-                        commentContent1 = comment1.has("text") ? comment1.getString("text") : "";
-                    }
-
-                    JSONObject comment2 = commentArr.getJSONObject(commentArr.length() - 1);
-                    if(comment2.has("from")){
-                        commentUserName2 = comment2.getJSONObject("from").has("username") ? comment2.getJSONObject("from").getString("username") : "";
-                        commentProfilePhotoUrl2 = comment2.getJSONObject("from").has("profile_picture") ? comment2.getJSONObject("from").getString("profile_picture") : "";
-                        commentContent2 = comment2.has("text") ? comment2.getString("text") : "";
-                    }
-                }
-
-                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG,
-                        "\n commentContent1: " + commentContent1 +
-                        "\n commentUserName2: " + commentUserName2 +
-                        "\n commentProfilePhotoUrl2: " + commentProfilePhotoUrl2 +
-                        "\n commentContent2: " + commentContent2 +
-                        "\n---------------------------------------------------------");
-                ipRow.setUserName(username);
-                ipRow.setUserProfilePhotoUrl(userProfilePhotoUrl);
-                ipRow.setCaption(caption);
-                ipRow.setLikeCount(likeCount);
-                ipRow.setMainPhotoUrl(mainPhotoUrl);
-                ipRow.setCommentUserName1(commentUserName1);
-                ipRow.setCommentUserProfilePhotoUrl1(commentProfilePhotoUrl1);
-                ipRow.setCommentContent1(commentContent1);
-                ipRow.setCommentUserName2(commentUserName2);
-                ipRow.setCommentUserProfilePhotoUrl2(commentProfilePhotoUrl2);
-                ipRow.setCommentContent2(commentContent2);
-                returnList.add(ipRow);
-            }
-            return returnList;
-        }catch (JSONException e){
-            Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, e.toString());
-            Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, e.getMessage());
-            return null;
-        }
-    }
-
-    public JSONObject InstagramAPIClient(String apiRoute) {
-        try {
-            Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "process api: " + apiRoute);
-            Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "auth token: " + String.valueOf(IG_AUTH_TOKEN));
-            JSONObject result = new GetHttpJSONTask(IG_API_PREFIX + apiRoute + "?access_token=" + IG_AUTH_TOKEN).execute().get();
-            return result;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }
