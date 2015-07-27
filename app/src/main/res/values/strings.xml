@@ -16,4 +16,5 @@
     <string name="instagram_autu_token">2107486180.369ca46.a58425c8557e44caa6e4d3d01c77c1ff</string>
     <string name="like_wording">likes</string>
     <string name="load_more">Load more comments...</string>
+    <string name="get_popular_data_failed_msg">Get popular data failed!\n please try again later</string>
 </resources>

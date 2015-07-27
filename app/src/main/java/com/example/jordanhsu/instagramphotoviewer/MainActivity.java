@@ -2,10 +2,12 @@ package com.example.jordanhsu.instagramphotoviewer;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,27 +27,27 @@ public class MainActivity extends Activity {
     private ArrayList<InstagramPostRow> IGPostRowList;
     private InstagramPostRowAdapter IGPostRowAdapter;
     private ListView mainContainerListView;
+    private SwipeRefreshLayout swipeContainer;
+    private Activity self;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "onCreate");
+        this.self = this;
 
-        IGPostRowList = new ArrayList<InstagramPostRow>();
-        mainContainerListView = (ListView) findViewById(R.id.mainContainerListView);
-
-        try {
-            renderPopularInstagramData();
-            IGPostRowAdapter = new InstagramPostRowAdapter(this,0,IGPostRowList);
-            mainContainerListView.setAdapter(IGPostRowAdapter);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e){
-            e.printStackTrace();
-        }
+        renderPopularPage();
+        // swipe to refresh
+        swipeContainer =  (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                renderPopularPage();
+                swipeContainer.setRefreshing(false);
+            }
+        });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -69,13 +71,28 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void renderPopularPage(){
+        try {
+            IGPostRowList = getPopularInstagramData();
+            if(IGPostRowList != null){
+                mainContainerListView = (ListView) findViewById(R.id.mainContainerListView);
+                IGPostRowAdapter = new InstagramPostRowAdapter(self,0,IGPostRowList);
+                mainContainerListView.setAdapter(IGPostRowAdapter);
+            }
+            else {
+                Toast.makeText(self, getString(R.string.get_popular_data_failed_msg) , Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
-    public void renderPopularInstagramData() throws IOException, JSONException {
-        // get view
-
-
+    public ArrayList<InstagramPostRow> getPopularInstagramData() throws IOException, JSONException {
+        ArrayList<InstagramPostRow> returnList = new ArrayList<InstagramPostRow>();
         // process API data
-        Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "renderPopularInstagramData");
+        Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "getPopularInstagramData");
         JSONObject result = InstagramAPIClient("/media/popular");
         Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "result: " + result.toString());
 
@@ -103,10 +120,21 @@ public class MainActivity extends Activity {
                     username = userObj.has("username") ? userObj.getString("username") : "";
                     userProfilePhotoUrl = userObj.has("profile_picture") ? userObj.getString("profile_picture") : "";
                 }
+                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "\n username: " + username +
+                        "\n userProfilePhotoUrl: " + userProfilePhotoUrl);
 
+                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "\n has caption:" + row.has("caption"));
+                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "\n has GGLA:" + row.has("GGLA"));
                 if (row.has("caption")){
+                    Log.d(MAIN_ACTIVITY_LOG_DEV_TAG,"DON't Do it, YOU DIE!!!!! ");
+                    Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, row.getJSONObject("caption").toString());
                     caption = row.getJSONObject("caption").has("text") ? row.getJSONObject("caption").getString("text") : "";
                 }
+
+
+                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "\n caption:" + caption);
+
+
                 if(row.has("likes")){
                     if(row.getJSONObject("likes").has("count")){
                         DecimalFormat myFormatter = new DecimalFormat("###,###");
@@ -115,6 +143,9 @@ public class MainActivity extends Activity {
                     }
                 }
 
+                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG,"\n likeCount: " + likeCount);
+
+
                 if(row.has("images")){
                     if(row.getJSONObject("images").has("standard_resolution")){
                         if(row.getJSONObject("images").getJSONObject("standard_resolution").has("url")){
@@ -122,6 +153,8 @@ public class MainActivity extends Activity {
                         }
                     }
                 }
+
+                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "\n mainPhotoUrl: " + mainPhotoUrl);
 
                 if(row.has("comments")){
                     commentCount = row.getJSONObject("comments").has("count") ? row.getJSONObject("comments").getInt("count") : 0;
@@ -143,6 +176,13 @@ public class MainActivity extends Activity {
                         commentContent2 = comment2.has("text") ? comment2.getString("text") : "";
                     }
                 }
+
+                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG,
+                        "\n commentContent1: " + commentContent1 +
+                        "\n commentUserName2: " + commentUserName2 +
+                        "\n commentProfilePhotoUrl2: " + commentProfilePhotoUrl2 +
+                        "\n commentContent2: " + commentContent2 +
+                        "\n---------------------------------------------------------");
                 ipRow.setUserName(username);
                 ipRow.setUserProfilePhotoUrl(userProfilePhotoUrl);
                 ipRow.setCaption(caption);
@@ -154,27 +194,15 @@ public class MainActivity extends Activity {
                 ipRow.setCommentUserName2(commentUserName2);
                 ipRow.setCommentUserProfilePhotoUrl2(commentProfilePhotoUrl2);
                 ipRow.setCommentContent2(commentContent2);
-                IGPostRowList.add(ipRow);
-
-                Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, "\n username: " + username +
-                        "\n userProfilePhotoUrl: " + userProfilePhotoUrl +
-                        "\n caption:" + caption +
-                        "\n likeCount: " + likeCount +
-                        "\n mainPhotoUrl: " + mainPhotoUrl +
-                        "\n commentUserName1: " + commentUserName1 +
-                        "\n commentProfilePhotoUrl1: " + commentProfilePhotoUrl1 +
-                        "\n commentContent1: " + commentContent1 +
-                        "\n commentUserName2: " + commentUserName2 +
-                        "\n commentProfilePhotoUrl2: " + commentProfilePhotoUrl2 +
-                        "\n commentContent2: " + commentContent2 +
-                        "\n---------------------------------------------------------");
+                returnList.add(ipRow);
             }
+            return returnList;
         }catch (JSONException e){
             Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, e.toString());
             Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, e.getMessage());
+            return null;
         }
     }
-
 
     public JSONObject InstagramAPIClient(String apiRoute) {
         try {

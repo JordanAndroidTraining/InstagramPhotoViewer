@@ -4,8 +4,8 @@
 * [x] User can scroll through current popular photos from Instagram
 * [x] For each photo displayed, user can see the following details:
  * [x] Graphic, Caption, Username
- * [ ] (Optional) relative timestamp, like count, user profile image
-* [ ]  Advanced: Add pull-to-refresh for popular stream with SwipeRefreshLayout
+ * [ ] relative timestamp, like count, user profile image (Optional)
+* [x]  Advanced: Add pull-to-refresh for popular stream with SwipeRefreshLayout
 * [x] Advanced: Show latest comment for each photo (bonus: show last 2 comments)
 * [ ] Advanced: Display each photo with the same style and proportions as the real Instagram (see screens below)
 * [ ] Advanced: Display each user profile image using a RoundedImageView
