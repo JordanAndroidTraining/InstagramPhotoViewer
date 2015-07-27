@@ -53,48 +53,28 @@ public class InstagramPostRowAdapter extends ArrayAdapter<InstagramPostRow> {
         commentUserNameTv2.setText(IGPostRowList.get(position).getCommentUserName2());
         commentContentTv2.setText(IGPostRowList.get(position).getCommentContent2());
 
-        mainPhotoIv.setImageResource(0);
-        userProfilePhotoIv.setImageResource(0);
-        commentProfilePhotoIv1.setImageResource(0);
-        commentProfilePhotoIv2.setImageResource(0);
+        doAsyncImageLoadingTask(IGPostRowList.get(position).getUserProfilePhotoUrl(),userProfilePhotoIv);
+        doAsyncImageLoadingTask(IGPostRowList.get(position).getMainPhotoUrl(),mainPhotoIv);
+        doAsyncImageLoadingTask(IGPostRowList.get(position).getCommentUserProfilePhotoUrl1(),commentProfilePhotoIv1);
+        doAsyncImageLoadingTask(IGPostRowList.get(position).getCommentUserProfilePhotoUrl2(),commentProfilePhotoIv2);
+        return  view;
+    }
 
-        // retrieve previous task and stop it
-        ImageLoadingTask prevUserProfileTask = (ImageLoadingTask) userProfilePhotoIv.getTag();
-        if(prevUserProfileTask != null) {
-            prevUserProfileTask.cancel(true);
+    public void doAsyncImageLoadingTask(String url, ImageView iv){
+        // clear image resource
+        iv.setImageResource(0);
+
+        // cancel previous task
+        ImageLoadingTask prevTask = (ImageLoadingTask) iv.getTag();
+        if(prevTask != null) {
+            prevTask.cancel(true);
         }
 
-        ImageLoadingTask prevMainPhotoTask = (ImageLoadingTask) mainPhotoIv.getTag();
-        if(prevMainPhotoTask != null){
-            prevMainPhotoTask.cancel(true);
-        }
-
-        ImageLoadingTask prevCommentProfilePhotoTask1 = (ImageLoadingTask) commentProfilePhotoIv1.getTag();
-        if(prevCommentProfilePhotoTask1 != null){
-            prevCommentProfilePhotoTask1.cancel(true);
-        }
-
-        ImageLoadingTask prevCommentProfilePhotoTask2 = (ImageLoadingTask) commentProfilePhotoIv2.getTag();
-        if(prevCommentProfilePhotoTask2 != null){
-            prevCommentProfilePhotoTask2.cancel(true);
-        }
-
-        // create new task
-        ImageLoadingTask userProfilePhotoTask =  new ImageLoadingTask(IGPostRowList.get(position).getUserProfilePhotoUrl(),userProfilePhotoIv);
-        ImageLoadingTask mainPhotoTask = new ImageLoadingTask(IGPostRowList.get(position).getMainPhotoUrl(),mainPhotoIv);
-        ImageLoadingTask commentProfielPhotoTask1 = new ImageLoadingTask(IGPostRowList.get(position).getCommentUserProfilePhotoUrl1(),commentProfilePhotoIv1);
-        ImageLoadingTask commentProfielPhotoTask2 = new ImageLoadingTask(IGPostRowList.get(position).getCommentUserProfilePhotoUrl2(),commentProfilePhotoIv2);
-
-        userProfilePhotoIv.setTag(userProfilePhotoTask);
-        mainPhotoIv.setTag(mainPhotoTask);
-        commentProfilePhotoIv1.setTag(commentProfielPhotoTask1);
-        commentProfilePhotoIv2.setTag(commentProfielPhotoTask2);
+        // create new task && set to ImageView tag
+        ImageLoadingTask newTask = new ImageLoadingTask(url,iv);
+        iv.setTag(newTask);
 
         // execute asyncTask
-        userProfilePhotoTask.execute();
-        mainPhotoTask.execute();
-        commentProfielPhotoTask1.execute();
-        commentProfielPhotoTask2.execute();
-        return  view;
+        newTask.execute();
     }
 }

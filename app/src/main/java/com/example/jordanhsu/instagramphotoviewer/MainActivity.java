@@ -168,8 +168,6 @@ public class MainActivity extends Activity {
                         "\n commentProfilePhotoUrl2: " + commentProfilePhotoUrl2 +
                         "\n commentContent2: " + commentContent2 +
                         "\n---------------------------------------------------------");
-                if (i > 5)
-                    break;
             }
         }catch (JSONException e){
             Log.d(MAIN_ACTIVITY_LOG_DEV_TAG, e.toString());
