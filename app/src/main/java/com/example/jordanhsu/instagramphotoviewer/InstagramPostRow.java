@@ -18,6 +18,16 @@ public class InstagramPostRow {
     private Long createTimestamp;
     private String relativeTimestamp;
 
+    public String getPostID() {
+        return postID;
+    }
+
+    public void setPostID(String postID) {
+        this.postID = postID;
+    }
+
+    private String postID;
+
     public String getRelativeTimestamp() {
         return relativeTimestamp;
     }

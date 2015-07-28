@@ -11,6 +11,6 @@
 * [ ] Advanced: Display each user profile image using a RoundedImageView
 * [x] Advanced: Display a nice default placeholder graphic for each image during loading (read more about Picasso)
 * [x] Advanced: Improve the user interface through styling and coloring
-* [ ] Bonus: Allow user to view all comments for an image within a separate activity or dialog fragment
+* [x] Bonus: Allow user to view all comments for an image within a separate activity or dialog fragment
 * [ ] Bonus: Allow video posts to be played in full-screen using the VideoView
 * [x] Extra: use AsyncTask to handle http request and image loading instead of using libraries

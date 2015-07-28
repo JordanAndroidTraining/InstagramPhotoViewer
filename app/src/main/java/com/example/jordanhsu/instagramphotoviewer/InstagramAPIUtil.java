@@ -38,6 +38,41 @@ public class InstagramAPIUtil {
         }
     }
 
+    public ArrayList<CommentRow> processAllCommentInstagramData(JSONObject result) throws JSONException {
+        ArrayList<CommentRow> returnList = new ArrayList<CommentRow>();
+        Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "processAllCommentInstagramData");
+
+        try {
+            if(checkColumnExist("data",result)){
+                JSONArray allRowData = result.getJSONArray("data");
+                for(int i= 0 ; i < allRowData.length(); i++){
+                    JSONObject row = allRowData.getJSONObject(i);
+                    CommentRow cRow = new CommentRow();
+                    String commentProfilePhotoUrl = "";
+                    String commentUserName = "";
+                    String commentContent = "";
+                    if(checkColumnExist("text",row)){
+                        commentContent = row.getString("text");
+                    }
+                    if(checkColumnExist("from",row)){
+                        commentProfilePhotoUrl = checkColumnExist("profile_picture",row.getJSONObject("from")) ? row.getJSONObject("from").getString("profile_picture") : "";
+                        commentUserName = checkColumnExist("username",row.getJSONObject("from")) ? row.getJSONObject("from").getString("username") : "";
+                    }
+                    cRow.setCommentUserProfileUrl(commentProfilePhotoUrl);
+                    cRow.setCommentUserName(commentUserName);
+                    cRow.setCommentContent(commentContent);
+                    returnList.add(cRow);
+                }
+                return returnList;
+            }
+            return null;
+        }catch (JSONException e){
+            Log.d(INSTAGRAM_API_UTIL_DEV_TAG, e.toString());
+            Log.d(INSTAGRAM_API_UTIL_DEV_TAG, e.getMessage());
+            return null;
+        }
+    }
+
     public ArrayList<InstagramPostRow> processPopularInstagramData(JSONObject result) throws IOException, JSONException {
         ArrayList<InstagramPostRow> returnList = new ArrayList<InstagramPostRow>();
         // process API data
@@ -64,6 +99,7 @@ public class InstagramAPIUtil {
                 String commentContent2 = "";
                 int commentCount = 0;
                 String relativeTimestamp = "";
+                String postID = "";
 
                 if (checkColumnExist("user", row)){
                     JSONObject userObj = row.getJSONObject("user");
@@ -131,6 +167,10 @@ public class InstagramAPIUtil {
                     relativeTimestamp = new PrettyTime().format(new Date(row.getLong("created_time")*1000));
                 }
 
+                if(checkColumnExist("id",row)){
+                    postID = row.getString("id");
+                }
+
                 ipRow.setUserName(username);
                 ipRow.setUserProfilePhotoUrl(userProfilePhotoUrl);
                 ipRow.setCaption(caption);
@@ -143,6 +183,7 @@ public class InstagramAPIUtil {
                 ipRow.setCommentUserProfilePhotoUrl2(commentProfilePhotoUrl2);
                 ipRow.setCommentContent2(commentContent2);
                 ipRow.setRelativeTimestamp(relativeTimestamp);
+                ipRow.setPostID(postID);
                 returnList.add(ipRow);
             }
             return returnList;

@@ -31,7 +31,7 @@ public class InstagramPostRowAdapter extends ArrayAdapter<InstagramPostRow> {
             Log.d(IG_POST_ROW_ADAPTER_DEV_TAG, "Convert View is null");
             view = LayoutInflater.from(context).inflate(R.layout.post_item,parent,false);
         }
-
+        // Get view resource reference
         TextView usernameTv = (TextView) view.findViewById(R.id.userNameTextView);
         TextView captionTv = (TextView) view.findViewById(R.id.captionTextView);
         TextView likeCountTv = (TextView) view.findViewById(R.id.likeCountTextView);
@@ -44,8 +44,9 @@ public class InstagramPostRowAdapter extends ArrayAdapter<InstagramPostRow> {
         TextView commentContentTv2 = (TextView) view.findViewById(R.id.commentContentTextView2);
         ImageView commentProfilePhotoIv2 = (ImageView) view.findViewById(R.id.commentProfileImageView2);
         TextView relativeTimestampTv = (TextView) view.findViewById(R.id.relativeTimestampTextView);
+        TextView loadMoreCommentTv = (TextView) view.findViewById(R.id.loadMoreTextView);
 
-
+        // Set view content
         usernameTv.setText(IGPostRowList.get(position).getUserName());
         captionTv.setText(IGPostRowList.get(position).getCaption());
         likeCountTv.setText(IGPostRowList.get(position).getLikeCount());
@@ -54,11 +55,17 @@ public class InstagramPostRowAdapter extends ArrayAdapter<InstagramPostRow> {
         commentUserNameTv2.setText(IGPostRowList.get(position).getCommentUserName2());
         commentContentTv2.setText(IGPostRowList.get(position).getCommentContent2());
         relativeTimestampTv.setText(IGPostRowList.get(position).getRelativeTimestamp());
-
-        doAsyncImageLoadingTask(IGPostRowList.get(position).getUserProfilePhotoUrl(),userProfilePhotoIv);
+        doAsyncImageLoadingTask(IGPostRowList.get(position).getUserProfilePhotoUrl(), userProfilePhotoIv);
         doAsyncImageLoadingTask(IGPostRowList.get(position).getMainPhotoUrl(),mainPhotoIv);
         doAsyncImageLoadingTask(IGPostRowList.get(position).getCommentUserProfilePhotoUrl1(),commentProfilePhotoIv1);
         doAsyncImageLoadingTask(IGPostRowList.get(position).getCommentUserProfilePhotoUrl2(),commentProfilePhotoIv2);
+
+        // add event listener
+        loadMoreCommentTv.setOnClickListener((View.OnClickListener) context);
+
+        // add tag
+        loadMoreCommentTv.setTag(IGPostRowList.get(position).getPostID());
+
         return  view;
     }
 
