@@ -29,6 +29,15 @@ public class InstagramAPIUtil {
         this.context = context;
     }
 
+    public boolean checkColumnExist(String key, JSONObject obj) throws JSONException {
+        if (obj.has(key) && !obj.isNull(key)){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     public ArrayList<InstagramPostRow> processPopularInstagramData(JSONObject result) throws IOException, JSONException {
         ArrayList<InstagramPostRow> returnList = new ArrayList<InstagramPostRow>();
         // process API data
@@ -41,7 +50,7 @@ public class InstagramAPIUtil {
             for (int i = 0; i < allRowData.length(); i++){
                 InstagramPostRow ipRow = new InstagramPostRow();
                 JSONObject row = allRowData.getJSONObject(i);
-
+                Log.d(INSTAGRAM_API_UTIL_DEV_TAG,"row data: " + row.toString());
                 String username = "";
                 String userProfilePhotoUrl = "";
                 String caption = "";
@@ -56,37 +65,32 @@ public class InstagramAPIUtil {
                 int commentCount = 0;
                 String relativeTimestamp = "";
 
-                if (row.has("user")){
+                if (checkColumnExist("user", row)){
                     JSONObject userObj = row.getJSONObject("user");
-                    username = userObj.has("username") ? userObj.getString("username") : "";
-                    userProfilePhotoUrl = userObj.has("profile_picture") ? userObj.getString("profile_picture") : "";
+                    username = checkColumnExist("username",userObj)  ? userObj.getString("username") : "";
+                    userProfilePhotoUrl = checkColumnExist("profile_picture",userObj)  ? userObj.getString("profile_picture") : "";
                 }
                 Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "\n username: " + username +
-                        "\n userProfilePhotoUrl: " + userProfilePhotoUrl);
+                                                "\n userProfilePhotoUrl: " + userProfilePhotoUrl);
 
-                Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "\n has caption:" + row.has("caption"));
-
-                if (row.has("caption")){
-                    Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "\n has caption(in if):" + row.has("caption"));
-                    Log.d(INSTAGRAM_API_UTIL_DEV_TAG, row.getJSONObject("caption").toString());
-                    caption = row.getJSONObject("caption").has("text") ? row.getJSONObject("caption").getString("text") : "";
+                if (checkColumnExist("caption",row)){
+                    caption = checkColumnExist("text",row.getJSONObject("caption")) ? row.getJSONObject("caption").getString("text") : "";
                 }
                 Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "\n caption:" + caption);
 
-                if(row.has("likes")){
+                if(checkColumnExist("likes",row)){
                     if(row.getJSONObject("likes").has("count")){
                         DecimalFormat myFormatter = new DecimalFormat("###,###");
                         likeCount = myFormatter.format(row.getJSONObject("likes").getInt("count")) + " " + context.getString(R.string.like_wording);
 
                     }
                 }
-
                 Log.d(INSTAGRAM_API_UTIL_DEV_TAG,"\n likeCount: " + likeCount);
 
 
-                if(row.has("images")){
-                    if(row.getJSONObject("images").has("standard_resolution")){
-                        if(row.getJSONObject("images").getJSONObject("standard_resolution").has("url")){
+                if(checkColumnExist("images", row)){
+                    if(checkColumnExist("standard_resolution", row.getJSONObject("images"))){
+                        if(checkColumnExist("url", row.getJSONObject("images").getJSONObject("standard_resolution"))){
                             mainPhotoUrl = row.getJSONObject("images").getJSONObject("standard_resolution").getString("url");
                         }
                     }
@@ -94,21 +98,21 @@ public class InstagramAPIUtil {
 
                 Log.d(INSTAGRAM_API_UTIL_DEV_TAG, "\n mainPhotoUrl: " + mainPhotoUrl);
 
-                if(row.has("comments")){
-                    commentCount = row.getJSONObject("comments").has("count") ? row.getJSONObject("comments").getInt("count") : 0;
+                if(checkColumnExist("comments", row)){
+                    commentCount = checkColumnExist("count", row.getJSONObject("comments")) ? row.getJSONObject("comments").getInt("count") : 0;
                 }
 
                 if (commentCount >= 2){
                     JSONArray commentArr = row.getJSONObject("comments").getJSONArray("data");
                     JSONObject comment1 = commentArr.getJSONObject(commentArr.length() - 2);
-                    if (comment1.has("from")){
+                    if (checkColumnExist("from", comment1)){
                         commentUserName1 = comment1.getJSONObject("from").has("username") ? comment1.getJSONObject("from").getString("username"): "";
                         commentProfilePhotoUrl1 = comment1.getJSONObject("from").has("profile_picture") ? comment1.getJSONObject("from").getString("profile_picture"): "";
                         commentContent1 = comment1.has("text") ? comment1.getString("text") : "";
                     }
 
                     JSONObject comment2 = commentArr.getJSONObject(commentArr.length() - 1);
-                    if(comment2.has("from")){
+                    if(checkColumnExist("from", comment2)){
                         commentUserName2 = comment2.getJSONObject("from").has("username") ? comment2.getJSONObject("from").getString("username") : "";
                         commentProfilePhotoUrl2 = comment2.getJSONObject("from").has("profile_picture") ? comment2.getJSONObject("from").getString("profile_picture") : "";
                         commentContent2 = comment2.has("text") ? comment2.getString("text") : "";
@@ -123,7 +127,7 @@ public class InstagramAPIUtil {
                                 "\n commentContent2: " + commentContent2 +
                                 "\n---------------------------------------------------------");
 
-                if(row.has("created_time")){
+                if (checkColumnExist("created_time", row) ){
                     relativeTimestamp = new PrettyTime().format(new Date(row.getLong("created_time")*1000));
                 }
 

@@ -56,6 +56,7 @@ public class GetInstagramPopularDataTask extends AsyncTask<Void, Void, JSONObjec
             return new JSONObject(content.toString());
         } catch (JSONException e) {
             Log.d(GET_JSON_ASYNC_TASK_DEV_TAG, e.toString());
+
             e.printStackTrace();
             return null;
         }
