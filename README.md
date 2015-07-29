@@ -14,3 +14,6 @@
 * [x] Bonus: Allow user to view all comments for an image within a separate activity or dialog fragment
 * [ ] Bonus: Allow video posts to be played in full-screen using the VideoView
 * [x] Extra: use AsyncTask to handle http request and image loading instead of using libraries
+
+### Walkthough
+![Video Walkthrough](walkthrough.gif)
